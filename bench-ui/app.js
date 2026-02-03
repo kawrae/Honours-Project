@@ -1,30 +1,47 @@
 const $ = (id) => document.getElementById(id);
 
 const state = {
-  active: "laravel", // "laravel" | "ci"
+  active: "laravel", // "laravel" | "ci" | "symfony"
   urls: {
     laravel: "http://laravel-bench.local",
     ci: "http://ci-bench.local",
+    symfony: "http://symfony-bench.local",
   },
 };
+
+const envLabel = (env) => (env === "laravel" ? "Laravel" : env === "ci" ? "CodeIgniter" : "Symfony");
+
+const envTag = (env) => (env === "laravel" ? "LARAVEL" : env === "ci" ? "CODEIGNITER" : "SYMFONY");
+
+const envs = ["laravel", "ci", "symfony"];
+
+function nextEnv(env = state.active) {
+  const i = envs.indexOf(env);
+  return envs[(i + 1) % envs.length];
+}
 
 function readInputs() {
   state.urls.laravel = $("urlLaravel").value.trim() || state.urls.laravel;
   state.urls.ci = $("urlCI").value.trim() || state.urls.ci;
+  state.urls.symfony = $("urlSymfony").value.trim() || state.urls.symfony;
 }
 
 function setActive(env) {
   state.active = env;
+
   $("tabLaravel").setAttribute("aria-selected", env === "laravel" ? "true" : "false");
   $("tabCI").setAttribute("aria-selected", env === "ci" ? "true" : "false");
-  $("activeEnvPill").textContent = `Active: ${env === "laravel" ? "Laravel" : "CodeIgniter"}`;
+  $("tabSymfony").setAttribute("aria-selected", env === "symfony" ? "true" : "false");
 
-  $("paneActiveTitle").textContent = env === "laravel" ? "Laravel" : "CodeIgniter";
-  $("paneOtherTitle").textContent = env === "laravel" ? "CodeIgniter" : "Laravel";
+  $("activeEnvPill").textContent = `Active: ${envLabel(env)}`;
+
+  $("paneActiveTitle").textContent = envLabel(env);
+  $("paneOtherTitle").textContent = envLabel(otherEnv());
 }
 
 function otherEnv() {
-  return state.active === "laravel" ? "ci" : "laravel";
+  // In compare mode we show active + the "next" environment.
+  return nextEnv(state.active);
 }
 
 function baseUrl(env) {
@@ -58,7 +75,7 @@ function addLog({ env, path, status, ms }) {
 
   const tag = document.createElement("span");
   tag.className = `tag ${tagClass}`;
-  tag.textContent = env === "laravel" ? "LARAVEL" : "CI";
+  tag.textContent = envTag(env);
 
   const p = document.createElement("span");
   p.className = "path";
@@ -228,12 +245,14 @@ async function deleteItemOne() {
 function init() {
   $("urlLaravel").value = state.urls.laravel;
   $("urlCI").value = state.urls.ci;
+  $("urlSymfony").value = state.urls.symfony;
 
   setActive("laravel");
 
   $("tabLaravel").addEventListener("click", () => setActive("laravel"));
   $("tabCI").addEventListener("click", () => setActive("ci"));
-  $("swapBtn").addEventListener("click", () => setActive(otherEnv()));
+  $("tabSymfony").addEventListener("click", () => setActive("symfony"));
+  $("swapBtn").addEventListener("click", () => setActive(nextEnv()));
 
   $("runHealth").addEventListener("click", healthChecks);
   $("clearLog").addEventListener("click", () => ($("log").innerHTML = ""));

@@ -18,9 +18,12 @@
 html,body{height:100%}
 body{
   margin:0;
-  background: radial-gradient(1200px 600px at 20% 10%, rgba(125,211,252,.12), transparent 60%),
-              radial-gradient(900px 500px at 80% 20%, rgba(167,139,250,.10), transparent 55%),
-              var(--bg);
+  min-height: 100%;
+  background: var(--bg);
+  background-image:
+    radial-gradient(1200px 600px at 20% 10%, rgba(125,211,252,.12), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(167,139,250,.10), transparent 55%);
+    background-attachment: fixed;
   color:var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
 }
@@ -71,6 +74,7 @@ body{
   grid-template-columns: 340px 1fr;
   gap: 16px;
   margin-top: 16px;
+  align-items: start;
 }
 
 .card{
@@ -284,6 +288,9 @@ code{
   margin-top: 12px;
   display:grid;
   gap:8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 .log-item{
   display:flex;
@@ -330,3 +337,30 @@ code{
   .split{grid-template-columns: 1fr}
   .form{grid-template-columns: 1fr}
 }
+
+@media (min-width: 600px) {
+  .topbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* scroll bar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #1e1e24;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #888;
+  }
