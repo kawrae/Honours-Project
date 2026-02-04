@@ -12,7 +12,7 @@ It includes test plans, raw benchmark results, and processed analysis files gene
   - `jmeter/` — Apache JMeter test plans (.jmx)
   - `results/`
     - `jmeter/` — Raw JMeter CSV outputs
-  - `jmeter_S1_analysis.xlsx` — Processed analysis workbook
+    - `jmeter_S1_analysis.xlsx` — Processed analysis workbook
 
 ---
 
