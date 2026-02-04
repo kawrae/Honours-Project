@@ -31,16 +31,3 @@ The documents stored here provide context for the experimental design, environme
   Defines the benchmark scenarios, endpoints, and load profiles used during performance testing.
 
 ---
-
-### Supporting Files
-
-- `README.md`  
-  Overview and index for the documentation contained in this directory.
-
----
-
-## Role in the Project
-
-The `docs/` directory serves as the **methodological and administrative record** of the Honours Project.
-
-Together with the source code and benchmarking artefacts, these documents support transparency, reproducibility, and academic accountability in the final dissertation.
