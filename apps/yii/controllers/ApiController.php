@@ -46,30 +46,31 @@ class ApiController extends Controller
 
     public function actionItems()
     {
-        $count = (int) Yii::$app->db->createCommand('SELECT COUNT(*) FROM items')->queryScalar();
-        return ['count' => $count];
+        return Yii::$app->db->createCommand(
+            'SELECT id, name, description, created_at, updated_at FROM items ORDER BY id ASC'
+        )->queryAll();
     }
 
     public function actionItem($id)
     {
         $row = Yii::$app->db->createCommand(
-            'SELECT id, name, description, created_at FROM items WHERE id = :id'
-        )->bindValue(':id', (int)$id)->queryOne();
+            'SELECT id, name, description, created_at, updated_at FROM items WHERE id = :id'
+        )->bindValue(':id', (int) $id)->queryOne();
 
         if (!$row) {
             Yii::$app->response->statusCode = 404;
             return ['error' => 'Not found'];
         }
 
-        return ['item' => $row];
+        return $row;
     }
 
     public function actionCreateItem()
     {
         $data = json_decode(Yii::$app->request->rawBody ?: '[]', true);
 
-        $name = trim((string)($data['name'] ?? ''));
-        $description = trim((string)($data['description'] ?? ''));
+        $name = trim((string) ($data['name'] ?? ''));
+        $description = trim((string) ($data['description'] ?? ''));
 
         if ($name === '') {
             Yii::$app->response->statusCode = 422;
@@ -81,13 +82,13 @@ class ApiController extends Controller
             'description' => $description,
         ])->execute();
 
-        return ['id' => (int)Yii::$app->db->getLastInsertID()];
+        return ['id' => (int) Yii::$app->db->getLastInsertID()];
     }
 
     public function actionDeleteItem($id)
     {
         $affected = Yii::$app->db->createCommand()
-            ->delete('items', ['id' => (int)$id])
+            ->delete('items', ['id' => (int) $id])
             ->execute();
 
         if ($affected === 0) {
