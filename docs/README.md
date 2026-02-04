@@ -1,71 +1,46 @@
-# Benchmark Environment Configuration
+# Project Documentation
 
-This document defines the hardware, software, and runtime configuration used for all benchmarking experiments conducted in this project.  
-The purpose of this configuration freeze is to ensure fairness, repeatability, and reproducibility across all framework comparisons.
+This directory contains all supporting documentation for the Honours Project, including formal academic submissions, benchmarking specifications, and methodological reference material.
 
-All benchmarks were executed under identical conditions unless explicitly stated otherwise.
-
----
-
-## Operating System
-
-- Windows 11 Home (Version 25H2, OS Build 26200.7623)
+The documents stored here provide context for the experimental design, environment configuration, and evaluation strategy used throughout the project.
 
 ---
 
-## Hardware Environment
+## Contents
 
-- CPU: AMD Ryzen 7 5800X 8-Core Processor
-- RAM: 32GB DDR4
+### Academic Submissions
 
----
+- `B01651145_HonsProject_InterimReport.pdf`  
+  Interim report submitted as part of the Honours Project assessment. This document outlines the project motivation, background research, methodology plan, and early progress.
 
-## Development Stack
-
-- XAMPP: 3.3.0
-- Apache: 2.4.58 (Win64)
-- PHP: 8.2.12 (Thread Safe)
-- Database: MariaDB 10.4.32
-- Dependency Manager: Composer 2.2.25
+- `B01651145_HonsProject_Specification.pdf`  
+  Official project specification detailing the agreed scope, objectives, and assessment requirements.
 
 ---
 
-## PHP Configuration
+### Benchmarking Documentation
 
-- memory_limit: 128M
-- max_execution_time: 30
-- OPcache: Enabled
-- display_errors: Off
+- `Benchmark_Environment_Configuration.md`  
+  Defines the hardware, software, and runtime configuration used for all benchmarking experiments.  
+  This configuration freeze ensures fairness, repeatability, and reproducibility across framework comparisons.
 
----
+- `Benchmark-Configuration.docx`  
+  Editable working document used during the preparation of the benchmark environment configuration.
 
-## Database Configuration
-
-- Storage Engine: InnoDB
-- Character Set: utf8mb4
-- Collation: utf8mb4_general_ci
+- `Benchmark-Scenarios.docx`  
+  Defines the benchmark scenarios, endpoints, and load profiles used during performance testing.
 
 ---
 
-## Framework Versions
+### Supporting Files
 
-- Laravel: 8.83.29
-- Symfony: 6.4.33
-- CodeIgniter: 4.6.4
-- Yii: 2.0.54
+- `README.md`  
+  Overview and index for the documentation contained in this directory.
 
 ---
 
-## Runtime Configuration
+## Role in the Project
 
-- Debug mode disabled across all frameworks
-- Production-equivalent settings used
-- No framework-specific performance optimisations applied
-- All framework dependencies were installed via Composer and frozen for the duration of benchmarking
+The `docs/` directory serves as the **methodological and administrative record** of the Honours Project.
 
----
-
-## Notes on Fairness and Reproducibility
-
-All frameworks interact with the same database schema and dataset.  
-Caching, debugging, and logging settings were standardised to minimise variability arising from configuration differences rather than framework architecture.
+Together with the source code and benchmarking artefacts, these documents support transparency, reproducibility, and academic accountability in the final dissertation.
