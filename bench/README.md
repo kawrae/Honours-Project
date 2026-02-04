@@ -8,11 +8,11 @@ It includes test plans, raw benchmark results, and processed analysis files gene
 
 ## Structure
 
-bench/
-├── jmeter/                 # Apache JMeter test plans (.jmx)<br/>
-├── results/<br/>
-│   └── jmeter/             # Raw JMeter CSV outputs<br/>
-├── jmeter_S1_analysis.xlsx # Processed analysis workbook<br/>
+- `bench/`
+  - `jmeter/` — Apache JMeter test plans (.jmx)
+  - `results/`
+    - `jmeter/` — Raw JMeter CSV outputs
+  - `jmeter_S1_analysis.xlsx` — Processed analysis workbook
 
 ---
 
