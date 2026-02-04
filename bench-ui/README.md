@@ -18,7 +18,7 @@ The interface was developed as a supporting tool to aid understanding and debugg
 ### Hosting and Deployment
 
 During development, the test UI is hosted locally via Apache at:
-"http://localhost/bench-ui"
+**localhost/bench-ui**
 The live version resides within the local web server (`htdocs`) for execution.  
 The `bench/bench-ui/` directory within this repository contains a **replicated copy** of the UI source code for version control, documentation, and reproducibility purposes.
 
@@ -29,5 +29,6 @@ No production deployment is required, and the UI is not accessed during automate
 While this project primarily focuses on backend framework performance, the inclusion of a small frontend component provided practical benefits during development without influencing experimental results.
 
 All performance comparisons and conclusions are based solely on backend metrics collected under identical, controlled conditions.
+
 
 
