@@ -1,232 +1,240 @@
 const $ = (id) => document.getElementById(id);
 
-const envMeta = {
-  laravel: { label: "Laravel", tabId: "tabLaravel", urlId: "urlLaravel" },
-  ci: { label: "CodeIgniter", tabId: "tabCI", urlId: "urlCI" },
-  symfony: { label: "Symfony", tabId: "tabSymfony", urlId: "urlSymfony" },
-};
-
-const envOrder = ["laravel", "ci", "symfony"];
-
 const state = {
   active: "laravel",
   urls: {
     laravel: "http://laravel-bench.local",
     ci: "http://ci-bench.local",
     symfony: "http://symfony-bench.local",
+    yii: "http://yii-bench.local",
   },
-  lastRun: null, // { path, options, mode } (mode at time of run)
+  lastPath: "/api/items",
 };
 
-function readInputs() {
-  for (const env of envOrder) {
-    const meta = envMeta[env];
-    const el = $(meta.urlId);
-    if (!el) continue;
-    const v = el.value.trim();
-    if (v) state.urls[env] = v;
-  }
+const envs = ["laravel", "ci", "symfony", "yii"];
+
+function envLabel(env) {
+  if (env === "laravel") return "Laravel";
+  if (env === "ci") return "CodeIgniter";
+  if (env === "symfony") return "Symfony";
+  return "Yii";
 }
 
-function nextEnv(env) {
-  const i = envOrder.indexOf(env);
-  return envOrder[(i + 1) % envOrder.length];
+function envTag(env) {
+  if (env === "laravel") return "LARAVEL";
+  if (env === "ci") return "CODEIGNITER";
+  if (env === "symfony") return "SYMFONY";
+  return "YII";
+}
+
+function nextEnv(env = state.active) {
+  const i = envs.indexOf(env);
+  return envs[(i + 1) % envs.length];
+}
+
+function otherEnv() {
+  return nextEnv(state.active);
 }
 
 function baseUrl(env) {
-  readInputs();
   return state.urls[env].replace(/\/+$/, "");
 }
 
-function setActive(env, { rerun = true } = {}) {
-  state.active = env;
-
-  // Tabs selected state
-  for (const e of envOrder) {
-    const tab = $(envMeta[e].tabId);
-    if (tab) tab.setAttribute("aria-selected", e === env ? "true" : "false");
-  }
-
-  $("activeEnvPill").textContent = `Active: ${envMeta[env].label}`;
-
-  // Pane titles
-  const other = nextEnv(env);
-  $("paneActiveTitle").textContent = envMeta[env].label;
-  $("paneOtherTitle").textContent = envMeta[other].label;
-
-  // IMPORTANT: clear stale pane data immediately so it never "lies"
-  clearPane("active");
-  clearPane("other");
-  setMeter(null, "idle");
-
-  // If user previously ran something (Load Items etc), re-run against new target(s)
-  if (rerun && state.lastRun) {
-    run(state.lastRun.path, state.lastRun.options, { record: false });
-  }
-}
-
-function clearPane(which) {
-  if (which === "active") {
-    $("outActive").textContent = "";
-    $("paneActiveLatency").textContent = "";
-  } else {
-    $("outOther").textContent = "";
-    $("paneOtherLatency").textContent = "";
-  }
+function readInputs() {
+  state.urls.laravel = $("urlLaravel").value.trim() || state.urls.laravel;
+  state.urls.ci = $("urlCI").value.trim() || state.urls.ci;
+  state.urls.symfony = $("urlSymfony").value.trim() || state.urls.symfony;
+  state.urls.yii = $("urlYii").value.trim() || state.urls.yii;
 }
 
 function setMeter(kind, text) {
-  // kind: null | "ok" | "err"
   const dot = $("meterDot");
-  const t = $("meterText");
-  dot.classList.remove("ok", "err");
-  if (kind === "ok") dot.classList.add("ok");
-  if (kind === "err") dot.classList.add("err");
-  t.textContent = text;
+  dot.classList.remove("good", "bad", "warn");
+  if (kind) dot.classList.add(kind);
+  $("meterText").textContent = text;
 }
 
-function fmtMs(ms) {
-  if (ms == null) return "";
-  return `${Math.round(ms)}ms`;
+function pretty(obj) {
+  try {
+    return JSON.stringify(obj, null, 2);
+  } catch {
+    return String(obj);
+  }
 }
 
-function logLine(env, path, status, ms) {
-  const row = document.createElement("div");
-  row.className = "log-row";
+function resetPanes() {
+  $("paneActiveLatency").textContent = "—";
+  $("paneOtherLatency").textContent = "—";
+  $("lastLatency").textContent = "—";
 
-  const pill = document.createElement("span");
-  pill.className = `pill pill-${env}`;
-  pill.textContent = env.toUpperCase();
+  $("outActive").textContent = "Press “Load Items”.";
+  $("outOther").textContent = "Compare mode will show both.";
+
+  setMeter(null, "idle");
+}
+
+function setActive(env) {
+  state.active = env;
+
+  $("tabLaravel").setAttribute("aria-selected", env === "laravel" ? "true" : "false");
+  $("tabCI").setAttribute("aria-selected", env === "ci" ? "true" : "false");
+  $("tabSymfony").setAttribute("aria-selected", env === "symfony" ? "true" : "false");
+  $("tabYii").setAttribute("aria-selected", env === "yii" ? "true" : "false");
+
+  $("activeEnvPill").textContent = `Active: ${envLabel(env)}`;
+
+  $("paneActiveTitle").textContent = envLabel(env);
+  $("paneOtherTitle").textContent = envLabel(otherEnv());
+
+  resetPanes();
+  setItemsViewActive("items");
+}
+
+function addLog({ env, path, status, ms }) {
+  const ok = status >= 200 && status < 300;
+  const tagClass = ok ? "good" : status >= 400 ? "bad" : "warn";
+
+  const item = document.createElement("div");
+  item.className = "log-item";
+
+  const left = document.createElement("div");
+  left.className = "log-left";
+
+  const tag = document.createElement("span");
+  tag.className = `tag ${tagClass}`;
+  tag.textContent = envTag(env);
 
   const p = document.createElement("span");
-  p.className = "log-path";
-  p.textContent = path;
+  p.className = "path";
+  p.textContent = `${path}`;
 
-  const s = document.createElement("span");
-  s.className = "log-meta";
-  s.textContent = `${status} • ${fmtMs(ms)}`;
+  left.appendChild(tag);
+  left.appendChild(p);
 
-  row.appendChild(pill);
-  row.appendChild(p);
-  row.appendChild(s);
+  const right = document.createElement("div");
+  right.className = "log-right";
+  right.textContent = `${status} • ${ms}ms`;
 
-  $("log").prepend(row);
+  item.appendChild(left);
+  item.appendChild(right);
+
+  $("log").prepend(item);
 }
 
-async function fetchJson(url, options = {}) {
-  const t0 = performance.now();
-  try {
-    const res = await fetch(url, options);
-    const ms = performance.now() - t0;
+async function timedFetch(env, path, options = {}) {
+  readInputs();
+  const url = `${baseUrl(env)}${path}`;
 
-    // Handle non-JSON (still try to parse)
-    let data = null;
+  const t0 = performance.now();
+  let res, data, status;
+
+  try {
+    res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
+
+    status = res.status;
+
     const text = await res.text();
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
       data = text;
     }
-
-    return { ok: res.ok, status: res.status, data, ms };
   } catch (e) {
-    const ms = performance.now() - t0;
-    return { ok: false, status: 0, data: { error: String(e) }, ms };
-  }
-}
-
-function renderPane(which, env, result) {
-  const out = which === "active" ? $("outActive") : $("outOther");
-  const badge = which === "active" ? $("paneActiveLatency") : $("paneOtherLatency");
-  badge.textContent = fmtMs(result.ms);
-
-  // Render JSON pretty if object/array
-  const d = result.data;
-  const pretty =
-    d && typeof d === "object" ? JSON.stringify(d, null, 2) : String(d ?? "");
-
-  out.textContent = pretty;
-}
-
-async function run(path, options = {}, { record = true } = {}) {
-  const mode = $("mode").value;
-
-  if (record) {
-    // Remember what the user did so tab switching can re-run it
-    state.lastRun = { path, options, mode };
+    const ms = Math.round(performance.now() - t0);
+    addLog({ env, path, status: 0, ms });
+    throw e;
   }
 
-  if (mode === "compare") {
-    $("paneOther").hidden = false;
-    return runCompare(path, options);
-  } else {
-    $("paneOther").hidden = true;
-    return runSingle(path, options);
-  }
+  const ms = Math.round(performance.now() - t0);
+  addLog({ env, path, status, ms });
+
+  return { status, ms, data };
 }
 
 async function runSingle(path, options = {}) {
   const env = state.active;
-  const url = baseUrl(env) + path;
+  setMeter("warn", `fetching ${path}…`);
 
-  setMeter(null, "running…");
-  const result = await fetchJson(url, options);
+  const outEl = $("outActive");
+  const badge = $("paneActiveLatency");
 
-  logLine(env, path, result.status, result.ms);
+  try {
+    const { status, ms, data } = await timedFetch(env, path, options);
+    badge.textContent = `${ms}ms`;
+    $("lastLatency").textContent = `${ms}ms`;
 
-  if (!result.ok) {
-    setMeter("err", "error");
-  } else {
-    setMeter("ok", `done • ${fmtMs(result.ms)}`);
+    const ok = status >= 200 && status < 300;
+    setMeter(ok ? "good" : "bad", `done • ${ms}ms`);
+
+    outEl.textContent = pretty(data);
+    return { status, ms, data };
+  } catch (e) {
+    badge.textContent = "—";
+    setMeter("bad", "error");
+    outEl.textContent = `Request failed.\n\n${String(e)}`;
+    return null;
   }
-
-  renderPane("active", env, result);
-  $("lastLatency").textContent = fmtMs(result.ms);
-
-  return result;
 }
 
 async function runCompare(path, options = {}) {
   const a = state.active;
-  const b = nextEnv(state.active);
+  const b = otherEnv();
 
-  const urlA = baseUrl(a) + path;
-  const urlB = baseUrl(b) + path;
+  $("paneOther").hidden = false;
+  setMeter("warn", `compare ${path}…`);
 
-  setMeter(null, "running…");
+  const outA = $("outActive");
+  const outB = $("outOther");
+  const badgeA = $("paneActiveLatency");
+  const badgeB = $("paneOtherLatency");
 
-  // Fire both concurrently
-  const [resA, resB] = await Promise.all([fetchJson(urlA, options), fetchJson(urlB, options)]);
+  try {
+    const [ra, rb] = await Promise.all([timedFetch(a, path, options), timedFetch(b, path, options)]);
 
-  // Log both
-  logLine(a, path, resA.status, resA.ms);
-  logLine(b, path, resB.status, resB.ms);
+    badgeA.textContent = `${ra.ms}ms`;
+    badgeB.textContent = `${rb.ms}ms`;
 
-  // Meter: ok only if both ok
-  if (resA.ok && resB.ok) {
-    setMeter("ok", `done • ${fmtMs(Math.max(resA.ms, resB.ms))}`);
-  } else {
-    setMeter("err", "error");
+    $("lastLatency").textContent = `${Math.min(ra.ms, rb.ms)}–${Math.max(ra.ms, rb.ms)}ms`;
+
+    const good = (r) => r.status >= 200 && r.status < 300;
+    const overallGood = good(ra) && good(rb);
+
+    setMeter(overallGood ? "good" : "bad", overallGood ? "done" : "done (errors)");
+
+    outA.textContent = pretty(ra.data);
+    outB.textContent = pretty(rb.data);
+
+    return { ra, rb };
+  } catch (e) {
+    setMeter("bad", "error");
+    outA.textContent = `Request failed.\n\n${String(e)}`;
+    outB.textContent = `Request failed.\n\n${String(e)}`;
+    return null;
   }
+}
 
-  // Render into the correct panes (ACTIVE pane is always state.active)
-  renderPane("active", a, resA);
-  renderPane("other", b, resB);
+function run(path, options = {}) {
+  const mode = $("mode").value;
 
-  $("lastLatency").textContent = `${fmtMs(Math.min(resA.ms, resB.ms))}–${fmtMs(Math.max(resA.ms, resB.ms))}`;
+  if (mode === "compare") return runCompare(path, options);
 
-  return { a: resA, b: resB };
+  $("paneOther").hidden = true;
+  return runSingle(path, options);
 }
 
 async function healthChecks() {
   $("pingStatus").textContent = "…";
   $("dbCount").textContent = "…";
 
-  // Ping
   const pingRes = await run("/api/bench/ping");
   if (!pingRes) return;
 
-  // DB Count
   const dbRes = await run("/api/bench/db");
   if (!dbRes) return;
 
@@ -243,46 +251,178 @@ async function createItem() {
   const name = $("newName").value.trim() || "Bench Insert";
   const description = $("newDesc").value.trim() || "Insert test";
 
-  const body = JSON.stringify({ name, description });
   await run("/api/items", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body,
+    body: JSON.stringify({ name, description }),
   });
+
+  await run("/api/items");
 }
 
 async function deleteItemOne() {
   await run("/api/items/1", { method: "DELETE" });
+  await run("/api/items");
 }
 
-function bind() {
-  // Tabs
+function setItemsViewActive(which) {
+  const loadItemsBtn = $("loadItems");
+  const loadOneBtn = $("loadOne");
+  const runBenchBtn = $("runBench10");
+
+  const setPrimary = (btn) => btn.classList.remove("ghost");
+  const setGhost = (btn) => btn.classList.add("ghost");
+
+  setGhost(loadItemsBtn);
+  setGhost(loadOneBtn);
+  setGhost(runBenchBtn);
+
+  if (which === "items") setPrimary(loadItemsBtn);
+  else if (which === "one") setPrimary(loadOneBtn);
+  else if (which === "bench") setPrimary(runBenchBtn);
+}
+
+function stats(msList) {
+  const n = msList.length;
+  const sorted = [...msList].sort((a, b) => a - b);
+  const sum = msList.reduce((a, b) => a + b, 0);
+  const pick = (p) => {
+    const idx = Math.min(n - 1, Math.max(0, Math.floor(p * (n - 1))));
+    return sorted[idx];
+  };
+  return {
+    n,
+    min: sorted[0],
+    max: sorted[n - 1],
+    mean: Math.round((sum / n) * 100) / 100,
+    p50: pick(0.5),
+    p95: pick(0.95),
+  };
+}
+
+async function runBenchmark(times = 10) {
+  setItemsViewActive("bench");
+  const path = state.lastPath || "/api/items";
+  const mode = $("mode").value;
+
+  const a = state.active;
+  const b = otherEnv();
+
+  $("paneOther").hidden = mode !== "compare";
+
+  $("outActive").textContent = "";
+  $("paneActiveLatency").textContent = "…";
+
+  if (mode === "compare") {
+    $("outOther").textContent = "";
+    $("paneOtherLatency").textContent = "…";
+  }
+
+  setMeter("warn", `benchmark ${path} ×${times}…`);
+
+  try {
+    if (mode === "compare") {
+      const aMs = [];
+      const bMs = [];
+
+      for (let i = 0; i < times; i++) {
+        const ra = await timedFetch(a, path);
+        const rb = await timedFetch(b, path);
+        aMs.push(ra.ms);
+        bMs.push(rb.ms);
+      }
+
+      const result = {
+        path,
+        runs: times,
+        [envLabel(a)]: stats(aMs),
+        [envLabel(b)]: stats(bMs),
+      };
+
+      $("outActive").textContent = pretty(result[envLabel(a)]);
+      $("outOther").textContent = pretty(result[envLabel(b)]);
+
+      $("paneActiveLatency").textContent = `${result[envLabel(a)].mean}ms`;
+      $("paneOtherLatency").textContent = `${result[envLabel(b)].mean}ms`;
+
+      $("lastLatency").textContent =
+        `${Math.min(result[envLabel(a)].mean, result[envLabel(b)].mean)}–` +
+        `${Math.max(result[envLabel(a)].mean, result[envLabel(b)].mean)}ms`;
+
+      setMeter("good", `done • ${path} ×${times}`);
+      return result;
+    } else {
+      const msList = [];
+
+      for (let i = 0; i < times; i++) {
+        const r = await timedFetch(a, path);
+        msList.push(r.ms);
+      }
+
+      const result = {
+        path,
+        runs: times,
+        [envLabel(a)]: stats(msList),
+      };
+
+      $("outActive").textContent = pretty(result[envLabel(a)]);
+      $("paneActiveLatency").textContent = `${result[envLabel(a)].mean}ms`;
+      $("lastLatency").textContent = `${result[envLabel(a)].mean}ms`;
+
+      setMeter("good", `done • ${path} ×${times}`);
+      return result;
+    }
+  } catch (e) {
+    setMeter("bad", "error");
+    $("outActive").textContent = `Benchmark failed.\n\n${String(e)}`;
+    if (mode === "compare") $("outOther").textContent = `Benchmark failed.\n\n${String(e)}`;
+    return null;
+  }
+}
+
+function init() {
+  $("urlLaravel").value = state.urls.laravel;
+  $("urlCI").value = state.urls.ci;
+  $("urlSymfony").value = state.urls.symfony;
+  $("urlYii").value = state.urls.yii;
+
+  setActive("laravel");
+  setItemsViewActive("items");
+
   $("tabLaravel").addEventListener("click", () => setActive("laravel"));
   $("tabCI").addEventListener("click", () => setActive("ci"));
   $("tabSymfony").addEventListener("click", () => setActive("symfony"));
+  $("tabYii").addEventListener("click", () => setActive("yii"));
+  $("swapBtn").addEventListener("click", () => setActive(nextEnv()));
 
-  // Swap cycles through envOrder
-  $("swapBtn").addEventListener("click", () => setActive(nextEnv(state.active)));
-
-  // Actions
   $("runHealth").addEventListener("click", healthChecks);
   $("clearLog").addEventListener("click", () => ($("log").innerHTML = ""));
-  $("loadItems").addEventListener("click", () => run("/api/items"));
-  $("loadOne").addEventListener("click", () => run("/api/items/1"));
+
+  $("loadItems").addEventListener("click", () => {
+    setItemsViewActive("items");
+    state.lastPath = "/api/items";
+    run("/api/items");
+  });
+  $("loadOne").addEventListener("click", () => {
+    setItemsViewActive("one");
+    state.lastPath = "/api/items/1";
+    run("/api/items/1");
+  });
+  $("runBench10").addEventListener("click", () => {
+    setItemsViewActive("bench");
+    runBenchmark(10);
+  });
   $("createItem").addEventListener("click", createItem);
   $("deleteOne").addEventListener("click", deleteItemOne);
 
-  // Mode change should rerun last action (or clear)
+  setMeter(null, "idle");
+
+  $("paneOther").hidden = $("mode").value !== "compare";
   $("mode").addEventListener("change", () => {
     $("paneOther").hidden = $("mode").value !== "compare";
-    // Titles might change because "other" env changes with active
-    setActive(state.active, { rerun: true });
+    $("paneOtherTitle").textContent = envLabel(otherEnv());
+    resetPanes();
   });
-
-  // Default UI state
-  $("paneOther").hidden = $("mode").value !== "compare";
-  setActive("laravel", { rerun: false });
-  setMeter(null, "idle");
 }
 
-bind();
+init();

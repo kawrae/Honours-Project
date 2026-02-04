@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Honours Benchmark Console</title>
+  <title>Benchmarking Console</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -13,7 +12,7 @@
       <div class="brand">
         <div class="logo">HB</div>
         <div class="brand-text">
-          <div class="title">Honours Benchmark Console</div>
+          <div class="title">Benchmarking Console</div>
           <div class="subtitle">A Comparative Performance Analysis of Widely Used PHP MVC Frameworks: Laravel, CodeIgniter, Symfony and Yii</div>
         </div>
       </div>
@@ -34,6 +33,8 @@
         <div class="segmented" role="tablist" aria-label="Environment">
           <button class="seg-btn" id="tabLaravel" role="tab" aria-selected="true">Laravel</button>
           <button class="seg-btn" id="tabCI" role="tab" aria-selected="false">CodeIgniter</button>
+          <button class="seg-btn" id="tabSymfony" role="tab" aria-selected="false">Symfony</button>
+          <button class="seg-btn" id="tabYii" role="tab" aria-selected="false">Yii</button>
         </div>
 
         <div class="field">
@@ -49,12 +50,24 @@
         </div>
 
         <div class="field">
+          <label>Symfony Base URL</label>
+          <input id="urlSymfony" spellcheck="false" />
+          <small class="hint">Default: http://symfony-bench.local</small>
+        </div>
+
+        <div class="field">
+          <label>Yii Base URL</label>
+          <input id="urlYii" spellcheck="false" />
+          <small class="hint">Default: http://yii-bench.local</small>
+        </div>
+
+        <div class="field">
           <label>Mode</label>
           <select id="mode">
             <option value="single">Single (active environment)</option>
-            <option value="compare">Compare (both environments)</option>
+            <option value="compare">Compare (active + next)</option>
           </select>
-          <small class="hint">Compare is great for parity screenshots.</small>
+          <small class="hint">Compare is great for parity screenshots (active + next target).</small>
         </div>
 
         <div class="actions">
@@ -89,6 +102,7 @@
         <div class="toolbar">
           <button class="btn" id="loadItems">Load Items</button>
           <button class="btn ghost" id="loadOne">Load Item #1</button>
+          <button id="runBench10" class="btn ghost">Run Benchmark (10x)</button>
 
           <div class="spacer"></div>
 
