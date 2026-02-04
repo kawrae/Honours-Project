@@ -10,9 +10,9 @@ It includes test plans, raw benchmark results, and processed analysis files gene
 
 bench/
 ├── jmeter/                 # Apache JMeter test plans (.jmx)<br/>
-├── results/
-│   └── jmeter/             # Raw JMeter CSV outputs
-├── jmeter_S1_analysis.xlsx # Processed analysis workbook
+├── results/<br/>
+│   └── jmeter/             # Raw JMeter CSV outputs<br/>
+├── jmeter_S1_analysis.xlsx # Processed analysis workbook<br/>
 
 ---
 
