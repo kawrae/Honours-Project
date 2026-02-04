@@ -18,7 +18,7 @@ apps/
 ### Laravel
 Located in `apps/laravel/`
 
-- Framework version: Laravel 8.x
+- Framework version: Laravel 8.83.29
 - Full-stack MVC framework with a rich service container and extensive abstraction layers
 - Uses Eloquent ORM for database access
 
@@ -27,7 +27,7 @@ Located in `apps/laravel/`
 ### Symfony
 Located in `apps/symfony/`
 
-- Framework version: Symfony 6.x
+- Framework version: Symfony 6.4.33
 - Modular, component-based MVC framework
 - Uses Doctrine ORM for database access
 
@@ -36,7 +36,7 @@ Located in `apps/symfony/`
 ### CodeIgniter
 Located in `apps/codeigniter/`
 
-- Framework version: CodeIgniter 4.x
+- Framework version: CodeIgniter 4.6.4
 - Lightweight MVC framework with minimal abstraction overhead
 - Uses the built-in database layer
 
@@ -45,7 +45,7 @@ Located in `apps/codeigniter/`
 ### Yii
 Located in `apps/yii/`
 
-- Framework version: Yii 2.x
+- Framework version: Yii 2.0.54
 - High-performance MVC framework with strong code generation support
 - Uses Active Record for database access
 
