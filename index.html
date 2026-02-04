@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Benchmarking Console</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">BC</div>
+        <div class="brand-text">
+          <div class="title">Benchmarking Console</div>
+          <div class="subtitle">A Comparative Performance Analysis of Widely Used PHP MVC Frameworks: Laravel, CodeIgniter, Symfony and Yii</div>
+        </div>
+      </div>
+
+      <div class="env">
+        <span class="pill" id="activeEnvPill">Active: —</span>
+        <button class="btn ghost" id="swapBtn" title="Swap environment">Swap</button>
+      </div>
+    </div>
+
+    <section class="grid">
+      <aside class="card">
+        <div class="card-head">
+          <h2>Targets</h2>
+          <p>Pick a backend to query. You can also open both at once.</p>
+        </div>
+
+        <div class="segmented" role="tablist" aria-label="Environment">
+          <button class="seg-btn" id="tabLaravel" role="tab" aria-selected="true">Laravel</button>
+          <button class="seg-btn" id="tabCI" role="tab" aria-selected="false">CodeIgniter</button>
+          <button class="seg-btn" id="tabSymfony" role="tab" aria-selected="false">Symfony</button>
+          <button class="seg-btn" id="tabYii" role="tab" aria-selected="false">Yii</button>
+        </div>
+
+        <div class="field">
+          <label>Laravel Base URL</label>
+          <input id="urlLaravel" spellcheck="false" />
+          <small class="hint">Default: http://laravel-bench.local</small>
+        </div>
+
+        <div class="field">
+          <label>CodeIgniter Base URL</label>
+          <input id="urlCI" spellcheck="false" />
+          <small class="hint">Default: http://ci-bench.local</small>
+        </div>
+
+        <div class="field">
+          <label>Symfony Base URL</label>
+          <input id="urlSymfony" spellcheck="false" />
+          <small class="hint">Default: http://symfony-bench.local</small>
+        </div>
+
+        <div class="field">
+          <label>Yii Base URL</label>
+          <input id="urlYii" spellcheck="false" />
+          <small class="hint">Default: http://yii-bench.local</small>
+        </div>
+
+        <div class="field">
+          <label>Mode</label>
+          <select id="mode">
+            <option value="single">Single (active environment)</option>
+            <option value="compare">Compare (active + next)</option>
+          </select>
+          <small class="hint">Compare is great for parity screenshots (active + next target).</small>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="runHealth">Run Health Checks</button>
+          <button class="btn ghost" id="clearLog">Clear Log</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="mini">
+          <div class="mini-row">
+            <span class="k">Ping</span>
+            <span class="v" id="pingStatus">—</span>
+          </div>
+          <div class="mini-row">
+            <span class="k">DB Count</span>
+            <span class="v" id="dbCount">—</span>
+          </div>
+          <div class="mini-row">
+            <span class="k">Last Latency</span>
+            <span class="v" id="lastLatency">—</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="card">
+        <div class="card-head">
+          <h2>Items</h2>
+          <p>Reads from <code>/api/items</code>. Optional write actions help demo CRUD parity.</p>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn" id="loadItems">Load Items</button>
+          <button class="btn ghost" id="loadOne">Load Item #1</button>
+          <button id="runBench10" class="btn ghost">Run Benchmark (10x)</button>
+
+          <div class="spacer"></div>
+
+          <div class="meter">
+            <span class="meter-dot" id="meterDot"></span>
+            <span class="meter-text" id="meterText">idle</span>
+          </div>
+        </div>
+
+        <div class="split" id="panes">
+          <section class="pane" id="paneActive">
+            <div class="pane-head">
+              <h3 id="paneActiveTitle">Active</h3>
+              <span class="badge" id="paneActiveLatency">—</span>
+            </div>
+            <pre class="output" id="outActive">Press “Load Items”.</pre>
+          </section>
+
+          <section class="pane" id="paneOther" hidden>
+            <div class="pane-head">
+              <h3 id="paneOtherTitle">Other</h3>
+              <span class="badge" id="paneOtherLatency">—</span>
+            </div>
+            <pre class="output" id="outOther">Compare mode will show both.</pre>
+          </section>
+        </div>
+
+        <div class="divider"></div>
+
+        <section class="card-sub">
+          <div class="card-sub-head">
+            <h3>Create Item (optional)</h3>
+            <p>Sends JSON to <code>POST /api/items</code>.</p>
+          </div>
+
+          <div class="form">
+            <div class="field">
+              <label>Name</label>
+              <input id="newName" placeholder="Bench Insert" />
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <input id="newDesc" placeholder="Insert test" />
+            </div>
+            <button class="btn" id="createItem">Create</button>
+            <button class="btn ghost" id="deleteOne">Delete Item #1</button>
+          </div>
+
+          <small class="hint">
+            Tip: For benchmarking runs, keep write actions off. Use them for demo/parity only.
+          </small>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="log">
+          <div class="log-head">
+            <h3>Request Log</h3>
+            <p>Each request records status + latency. Useful for screenshots.</p>
+          </div>
+          <div class="log-list" id="log"></div>
+        </section>
+      </main>
+    </section>
+
+    <footer class="footer">
+      <span>Bench UI lives in <code>/bench-ui</code> and queries your local vhosts.</span>
+      <span class="muted">No build tools • Just HTML/CSS/JS</span>
+    </footer>
+  </header>
+
+  <script src="./app.js"></script>
+</body>
+</html>
