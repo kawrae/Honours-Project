@@ -8,11 +8,11 @@ Each subdirectory represents a **functionally equivalent backend application**, 
 
 ## Included Frameworks
 
-apps/
-├── laravel/
-├── symfony/
-├── codeigniter/
-└── yii/
+- `apps/`
+  - `laravel/`
+  - `codeigniter/`
+  - `symfony/`
+  - `yii/`
 
 
 ### Laravel
