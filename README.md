@@ -7,8 +7,8 @@ This repository contains the source code, benchmarking artefacts, and experiment
 The project evaluates the **performance, scalability, and architectural trade-offs** of four widely used PHP MVC frameworks under identical conditions:
 
 - Laravel
-- Symfony
 - CodeIgniter
+- Symfony
 - Yii
 
 ---
