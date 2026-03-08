@@ -1,0 +1,3 @@
+Label,# Samples,Average,Median,90% Line,95% Line,99% Line,Min,Max,Error %,Throughput,Received KB/sec,Sent KB/sec
+POST /api/items,100,77,70,84,91,104,57,748,0.000%,12.89823,5.82,3.60
+TOTAL,100,77,70,84,91,104,57,748,0.000%,12.89823,5.82,3.60
