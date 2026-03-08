@@ -8,12 +8,9 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 $routes->group('api', function($routes) {
-    $routes->get('bench/ping', 'BenchController::ping');
-    $routes->get('bench/db', 'BenchController::db');
-
-    $routes->get('items', 'ItemsController::index');
-    $routes->get('items/(:num)', 'ItemsController::show/$1');
-    $routes->post('items', 'ItemsController::store');
-    $routes->put('items/(:num)', 'ItemsController::update/$1');
-    $routes->delete('items/(:num)', 'ItemsController::destroy/$1');
+    $routes->get('items', 'Api\Items::index');
+    $routes->get('items/(:num)', 'Api\Items::show/$1');
+    $routes->post('items', 'Api\Items::create');
+    $routes->put('items/(:num)', 'Api\Items::update/$1');
+    $routes->delete('items/(:num)', 'Api\Items::delete/$1');
 });
