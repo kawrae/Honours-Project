@@ -1,11 +1,11 @@
 # -------------------------
 # Personal documents
 # -------------------------
-B01651145_HonsProject.docx
-B01651145_HonsProject_InterimReport.pdf
-B01651145_HonsProject_Presentation.pdf
-B01651145_HonsProject_Presentation.pptx
-IR-Feedback-B01651145-Corey-Black.pdf
+docs/*.docx
+docs/*.pptx
+docs/*Presentation.pdf
+docs/*InterimReport.pdf
+docs/*Feedback*.pdf
 
 # -------------------------
 # OS files
