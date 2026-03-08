@@ -14,6 +14,9 @@ $config = [
     'components' => [
         'request' => [
             'cookieValidationKey' => '41i9feGsvHBMCyRTqe_WxjuWPn5onDBQ',
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ],
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -51,8 +54,8 @@ $config = [
 
                 'GET api/items' => 'api/items',
                 'GET api/items/<id:\d+>' => 'api/item',
-
                 'POST api/items' => 'api/create-item',
+                'PUT api/items/<id:\d+>' => 'api/update-item',
                 'DELETE api/items/<id:\d+>' => 'api/delete-item',
             ],
         ],

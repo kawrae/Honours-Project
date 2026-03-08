@@ -3,99 +3,77 @@
 namespace app\controllers;
 
 use Yii;
-use yii\web\Controller;
+use yii\rest\Controller;
 use yii\web\Response;
+use yii\web\NotFoundHttpException;
+use app\models\Item;
 
 class ApiController extends Controller
 {
-    public $enableCsrfValidation = false;
-
     public function beforeAction($action)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-
-        $origin = Yii::$app->request->headers->get('Origin');
-        $allowed = ['http://localhost', 'http://localhost:80', 'http://bench-ui.local'];
-
-        if ($origin && in_array($origin, $allowed, true)) {
-            $h = Yii::$app->response->headers;
-            $h->set('Access-Control-Allow-Origin', $origin);
-            $h->set('Vary', 'Origin');
-            $h->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-            $h->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        }
-
-        if (Yii::$app->request->isOptions) {
-            Yii::$app->response->statusCode = 204;
-            return false;
-        }
-
         return parent::beforeAction($action);
-    }
-
-    public function actionBenchPing()
-    {
-        return ['ok' => true];
-    }
-
-    public function actionBenchDb()
-    {
-        $count = (int) Yii::$app->db->createCommand('SELECT COUNT(*) FROM items')->queryScalar();
-        return ['count' => $count];
     }
 
     public function actionItems()
     {
-        return Yii::$app->db->createCommand(
-            'SELECT id, name, description, created_at, updated_at FROM items ORDER BY id ASC'
-        )->queryAll();
+        return Item::find()->orderBy(['id' => SORT_ASC])->asArray()->all();
     }
 
     public function actionItem($id)
     {
-        $row = Yii::$app->db->createCommand(
-            'SELECT id, name, description, created_at, updated_at FROM items WHERE id = :id'
-        )->bindValue(':id', (int) $id)->queryOne();
+        $item = Item::findOne($id);
 
-        if (!$row) {
-            Yii::$app->response->statusCode = 404;
-            return ['error' => 'Not found'];
+        if (!$item) {
+            throw new NotFoundHttpException('Item not found');
         }
 
-        return $row;
+        return $item->toArray();
     }
 
     public function actionCreateItem()
     {
-        $data = json_decode(Yii::$app->request->rawBody ?: '[]', true);
+        $item = new Item();
+        $item->load(Yii::$app->request->bodyParams, '');
 
-        $name = trim((string) ($data['name'] ?? ''));
-        $description = trim((string) ($data['description'] ?? ''));
-
-        if ($name === '') {
-            Yii::$app->response->statusCode = 422;
-            return ['error' => 'Name is required'];
+        if ($item->save()) {
+            Yii::$app->response->statusCode = 201;
+            return $item->toArray();
         }
 
-        Yii::$app->db->createCommand()->insert('items', [
-            'name' => $name,
-            'description' => $description,
-        ])->execute();
+        Yii::$app->response->statusCode = 422;
+        return $item->errors;
+    }
 
-        return ['id' => (int) Yii::$app->db->getLastInsertID()];
+    public function actionUpdateItem($id)
+    {
+        $item = Item::findOne($id);
+
+        if (!$item) {
+            throw new NotFoundHttpException('Item not found');
+        }
+
+        $item->load(Yii::$app->request->bodyParams, '');
+
+        if ($item->save()) {
+            return $item->toArray();
+        }
+
+        Yii::$app->response->statusCode = 422;
+        return $item->errors;
     }
 
     public function actionDeleteItem($id)
     {
-        $affected = Yii::$app->db->createCommand()
-            ->delete('items', ['id' => (int) $id])
-            ->execute();
+        $item = Item::findOne($id);
 
-        if ($affected === 0) {
-            Yii::$app->response->statusCode = 404;
-            return ['error' => 'Not found'];
+        if (!$item) {
+            throw new NotFoundHttpException('Item not found');
         }
 
-        return ['deleted' => true];
+        $item->delete();
+
+        return ['message' => 'Item deleted'];
     }
 }
