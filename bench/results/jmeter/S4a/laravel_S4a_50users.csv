@@ -1,0 +1,3 @@
+Label,# Samples,Average,Median,90% Line,95% Line,99% Line,Min,Max,Error %,Throughput,Received KB/sec,Sent KB/sec
+PUT /api/items/{id},5000,413,392,640,720,950,142,1523,0.000%,56.32216,24.73,16.43
+TOTAL,5000,413,392,640,720,950,142,1523,0.000%,56.32216,24.73,16.43
