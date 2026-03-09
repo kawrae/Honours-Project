@@ -12,7 +12,7 @@ It includes test plans, raw benchmark results, and processed analysis files gene
   - `jmeter/` — Apache JMeter test plans (.jmx)
   - `results/`
     - `jmeter/` — Raw JMeter CSV outputs
-    - `jmeter_S1_analysis.xlsx` — Processed analysis workbook
+    - `jmeter_S1-4b_analysis.xlsx` — Processed analysis workbooks
 
 ---
 
@@ -43,22 +43,6 @@ These CSV files are preserved unmodified and represent the primary source of qua
 
 ---
 
-## Analysis Workbook
-
-- `jmeter_S1_analysis.xlsx`
-
-This Excel workbook aggregates and summarises raw benchmark data for Scenario S1.
-
-It is used to extract and compare:
-- Average response time
-- Median latency
-- 95th percentile latency (P95)
-- Throughput under load
-- Error rate
-
-All charts and tables presented in the dissertation are derived directly from this workbook.
-
----
 
 ## Role in the Project
 
