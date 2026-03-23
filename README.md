@@ -17,7 +17,7 @@ The project evaluates the **performance, scalability, and architectural trade-of
 
 **Student:** Corey Black  
 **Banner ID:** B01651145  
-**Programme:** BSc (Hons) Web and Mobile Development  
+**Course:** BSc (Hons) Web and Mobile Development  
 **Institution:** University of the West of Scotland  
 
 ### Aim
