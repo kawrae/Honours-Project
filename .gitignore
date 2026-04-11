@@ -29,3 +29,4 @@ apps/*/.env
 # -------------------------
 bench/results/*.jtl
 bench/results/*.log
+docs/B01651145_HonsProject.pdf
